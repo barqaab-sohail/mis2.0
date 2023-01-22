@@ -19,6 +19,25 @@ import {
 import { useQuery } from "react-query";
 const END_POINT = "/projectExpenseChart/";
 import { AuthContext } from "../../context/AuthContext";
+import {
+  VictoryBar,
+  VictoryChart,
+  VictoryTheme,
+  VictoryGroup,
+} from "victory-native";
+
+const data1 = [
+  { quarter: 1, earnings: 13000 },
+  { quarter: 2, earnings: 16500 },
+  { quarter: 3, earnings: 14250 },
+  { quarter: 4, earnings: 19000 },
+];
+
+const data2 = [
+  { x: "jan", y: 1 },
+  { x: "feb", y: 2 },
+  { x: "mar", y: 5 },
+];
 
 const BarChartMonthlyEIP = (props) => {
   const { userInfo } = useContext(AuthContext);
@@ -26,11 +45,11 @@ const BarChartMonthlyEIP = (props) => {
   const expenses = [];
   const invoices = [];
   const payments = [];
-
+  const id = props.route.params.projectId;
   const { isLoading, error, data } = useQuery(
-    ["projectExpenseChart", props.route.params.projectId],
+    ["projectExpenseChart", id],
     () => {
-      return Api.get(END_POINT + props.route.params.projectId, {
+      return Api.get(END_POINT + id, {
         headers: {
           Authorization: `Bearer ${userInfo.token}`,
         },
@@ -41,48 +60,42 @@ const BarChartMonthlyEIP = (props) => {
       refetchInterval: 60000, //refresh on some time
     }
   );
-  data?.data.map((Item) => {
-    months.push(Item.months);
-    expenses.push(Item.expenses);
-    invoices.push(Item.invoices);
-    payments.push(Item.payments);
-  });
+
   if (isLoading) {
     return <Text>Loading .....</Text>;
   }
-  const screenWidth = Dimensions.get("window").width;
-  const chartConfig = {
-    backgroundGradientFrom: "#1E2923",
-    backgroundGradientFromOpacity: 0,
-    backgroundGradientTo: "#08130D",
-    backgroundGradientToOpacity: 0.5,
-    color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
-    strokeWidth: 2, // optional, default 3
-    barPercentage: 0.5,
-    useShadowColorFromDataset: false, // optional
-  };
-  const chartData = {
-    labels: months,
-    datasets: [
-      {
-        data: [20, 45, 28, 80],
-      },
-    ],
-  };
-
-  const isAllZero = expenses.every((item) => item === 0);
+  const isAllZero = false;
   return isAllZero === false ? (
     <>
       <View>
         <Text>Bezier Line Chart</Text>
-        <BarChart
-          data={chartData}
-          width={screenWidth}
-          height={220}
-          yAxisLabel="$"
-          chartConfig={chartConfig}
-          verticalLabelRotation={30}
-        />
+        <View style={styles.container}>
+          <VictoryChart>
+            <VictoryGroup offset={20} colorScale={"qualitative"}>
+              <VictoryBar
+                data={[
+                  { x: "jan", y: 1 },
+                  { x: "feb", y: 2 },
+                  { x: "mar", y: 5 },
+                ]}
+              />
+              <VictoryBar
+                data={[
+                  { x: "jan", y: 2 },
+                  { x: "feb", y: 2 },
+                  { x: "mar", y: 5 },
+                ]}
+              />
+              <VictoryBar
+                data={[
+                  { x: "jan", y: 5 },
+                  { x: "feb", y: 2 },
+                  { x: "mar", y: 5 },
+                ]}
+              />
+            </VictoryGroup>
+          </VictoryChart>
+        </View>
       </View>
     </>
   ) : (
@@ -102,9 +115,8 @@ export default BarChartMonthlyEIP;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5FCFF",
-  },
-  chart: {
-    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5fcff",
   },
 });

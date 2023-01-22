@@ -24,6 +24,7 @@ const Dashboardf = (props) => {
       id: 2,
       title: "Assets",
       image: require("../../assets/assets-64.png"),
+      nav: "Asset List",
     },
   ];
 
